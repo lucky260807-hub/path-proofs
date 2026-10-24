@@ -1,0 +1,315 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#18181B">
+    <meta name="description" content="Path Proofs is an experimental pedestrian navigation prototype with route information and community-reported barriers.">
+    <title>Path Proofs | Accessible Navigation for India</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+</head>
+
+<body>
+    <header class="site-header">
+        <a class="brand" href="#welcome-screen" id="brandHome">
+            <span class="brand-mark" aria-hidden="true">P</span>
+            <span>Path Proofs</span>
+        </a>
+
+        <span class="header-caption">Accessible mobility for India</span>
+    </header>
+
+    <main id="main-content">
+        <a class="skip-link" href="#main-content">Skip to main content</a>
+
+        <!-- Welcome screen -->
+        <section
+            id="welcome-screen"
+            class="app-screen welcome-screen"
+            aria-labelledby="welcome-title"
+        >
+            <div class="welcome-content">
+                <p class="eyebrow">ACCESSIBLE MOBILITY FOR EVERYONE</p>
+
+                <div class="welcome-logo" aria-hidden="true">P</div>
+
+                <h1 id="welcome-title">Welcome to Path Proofs</h1>
+
+                <p class="welcome-description">
+                    Explore possible pedestrian routes, view a map,
+                    and learn about accessibility barriers reported
+                    by the community.
+                </p>
+
+                <div class="notice">
+                    <strong>Before you travel</strong>
+                    <p>
+                        This is an experimental prototype. Routes and
+                        accessibility information are not independently
+                        verified. Always check real-world conditions.
+                    </p>
+                </div>
+
+                <button id="startAppButton" class="primary-button" type="button">
+                    Start your journey <span aria-hidden="true">→</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Progress and navigation -->
+        <div id="wizard-navigation" class="wizard-navigation" hidden>
+            <div class="progress-heading">
+                <span id="step-label">Step 1 of 3</span>
+                <span id="step-title">Plan your journey</span>
+            </div>
+
+            <div
+                id="step-progress"
+                class="step-progress"
+                role="progressbar"
+                aria-label="Journey setup progress"
+                aria-valuemin="1"
+                aria-valuemax="3"
+                aria-valuenow="1"
+            >
+                <div id="step-progress-fill" class="step-progress-fill"></div>
+            </div>
+
+            <div class="wizard-buttons">
+                <button id="backButton" class="secondary-button" type="button">
+                    ← Back
+                </button>
+                <button id="nextButton" class="primary-button" type="button">
+                    Next →
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 1: Plan -->
+        <section
+            id="planner-screen"
+            class="app-screen content-screen"
+            aria-labelledby="planner-heading"
+            hidden
+        >
+            <div class="section-heading">
+                <p class="eyebrow">STEP 1</p>
+                <h2 id="planner-heading">Plan your journey</h2>
+                <p>Enter your starting point and destination in India.</p>
+            </div>
+
+            <section class="card planner-card" id="planner">
+                <form id="routeForm">
+                    <div class="form-field">
+                        <label for="start">Starting point</label>
+                        <input
+                            id="start"
+                            name="start"
+                            type="text"
+                            placeholder="e.g. India Gate, New Delhi"
+                            autocomplete="off"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-field">
+                        <label for="destination">Destination</label>
+                        <input
+                            id="destination"
+                            name="destination"
+                            type="text"
+                            placeholder="e.g. Connaught Place, New Delhi"
+                            autocomplete="off"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-field">
+                        <label for="profile">Accessibility preference</label>
+                        <select id="profile" name="profile">
+                            <option value="general">General pedestrian route</option>
+                            <option value="wheelchair">Wheelchair accessibility</option>
+                            <option value="lowvision">Low-vision awareness</option>
+                            <option value="mobility">Reduced mobility</option>
+                        </select>
+                    </div>
+
+                    <p id="profileMessage" class="helper-text">
+                        Accessibility preferences help frame your journey.
+                        This prototype cannot verify every accessibility feature.
+                    </p>
+
+                    <button id="routeButton" class="primary-button full-width" type="submit">
+                        Find a possible route
+                    </button>
+                </form>
+
+                <p id="routeStatus" class="status-message" role="status" aria-live="polite"></p>
+
+                <div id="result" class="result-message" role="status" aria-live="polite"></div>
+
+                <div id="routeResults" class="route-results"></div>
+            </section>
+        </section>
+
+        <!-- Step 2: Map and route information -->
+        <section
+            id="map-screen"
+            class="app-screen content-screen"
+            aria-labelledby="map-heading"
+            hidden
+        >
+            <div class="section-heading">
+                <p class="eyebrow">STEP 2</p>
+                <h2 id="map-heading">Explore your route</h2>
+                <p>Review the map and any available community reports.</p>
+            </div>
+
+            <section class="card map-card" id="map-section">
+                <div class="map-heading-row">
+                    <div>
+                        <h3>Route map</h3>
+                        <p class="helper-text">Map data © OpenStreetMap contributors</p>
+                    </div>
+                    <button id="resetMapButton" class="secondary-button" type="button">
+                        Show India
+                    </button>
+                </div>
+
+                <div
+                    id="map"
+                    class="map-container"
+                    role="region"
+                    aria-label="Interactive map showing the route and reported barriers"
+                ></div>
+
+                <p id="mapStatus" class="helper-text" role="status" aria-live="polite">
+                    Search for a route in Step 1 to display it here.
+                </p>
+            </section>
+
+            <section class="card confidence-card" id="confidence-section">
+                <div class="section-heading compact-heading">
+                    <p class="eyebrow">DATA CONFIDENCE</p>
+                    <h3>Understand the information</h3>
+                    <p>Reported information is not the same as verified accessibility.</p>
+                </div>
+
+                <div class="confidence-grid">
+                    <div class="confidence-item">
+                        <span class="confidence-number" id="reportCount">0</span>
+                        <span>Active local reports</span>
+                    </div>
+
+                    <div class="confidence-item">
+                        <span class="confidence-number">Experimental</span>
+                        <span>Route information</span>
+                    </div>
+
+                    <div class="confidence-item">
+                        <span class="confidence-number">Unverified</span>
+                        <span>Accessibility conditions</span>
+                    </div>
+                </div>
+
+                <div class="notice">
+                    <strong>Important limitation</strong>
+                    <p>
+                        A mapped route does not guarantee step-free access,
+                        safe crossings, smooth footpaths, tactile paving,
+                        or working lifts. Confirm conditions before travelling.
+                    </p>
+                </div>
+            </section>
+        </section>
+
+        <!-- Step 3: Community barrier reporting -->
+        <section
+            id="report-screen"
+            class="app-screen content-screen"
+            aria-labelledby="report-heading"
+            hidden
+        >
+            <div class="section-heading">
+                <p class="eyebrow">STEP 3</p>
+                <h2 id="report-heading">Report a barrier</h2>
+                <p>Share a pedestrian accessibility issue with this prototype.</p>
+            </div>
+
+            <section class="card report-card" id="barrier-report-section">
+                <form id="barrierForm">
+                    <div class="form-field">
+                        <label for="barrier">Type of barrier</label>
+                        <select id="barrier" name="barrier" required>
+                            <option value="">Choose a barrier</option>
+                            <option value="Blocked footpath">Blocked footpath</option>
+                            <option value="Missing kerb ramp">Missing kerb ramp</option>
+                            <option value="Broken footpath">Broken footpath</option>
+                            <option value="Unsafe crossing">Unsafe crossing</option>
+                            <option value="Stairs or steps">Stairs or steps</option>
+                            <option value="Obstruction">Other obstruction</option>
+                        </select>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="location">Location in India</label>
+                        <input
+                            id="location"
+                            name="location"
+                            type="text"
+                            placeholder="e.g. Near a bus stop in New Delhi"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-field">
+                        <label for="barrierDetails">Additional details</label>
+                        <textarea
+                            id="barrierDetails"
+                            name="barrierDetails"
+                            rows="3"
+                            maxlength="500"
+                            placeholder="Describe the issue (optional)"
+                        ></textarea>
+                    </div>
+
+                    <button id="reportButton" class="primary-button full-width" type="submit">
+                        Submit report
+                    </button>
+                </form>
+
+                <p id="reportResult" class="status-message" role="status" aria-live="polite"></p>
+
+                <div class="report-list-heading">
+                    <h3>Recent local reports</h3>
+                    <p class="helper-text">
+                        Reports are saved in this browser and expire after 60 minutes.
+                        They are not automatically shared with other users.
+                    </p>
+                </div>
+
+                <div id="reportList" class="report-list">
+                    <p class="empty-state">No reports yet.</p>
+                </div>
+
+                <button id="finishButton" class="secondary-button full-width" type="button">
+                    Finish and return to welcome
+                </button>
+            </section>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>Path Proofs · An experimental accessible-navigation prototype for India</p>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
